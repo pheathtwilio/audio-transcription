@@ -14,7 +14,6 @@ const server = http.createServer(app);
 const options = {
   key: fs.readFileSync("./ssl/rootCA.key"),
   cert: fs.readFileSync("./ssl/rootCA.crt")
-  // ca: fs.readFileSync("")
 }
 
 const secureServer = https.createServer(options, app)
@@ -59,6 +58,6 @@ server.listen(process.env.PORT, () => {
   console.log('listening on http://localhost:' + process.env.PORT);
 });
 
-secureServer.listen(process.env.SECURE_PORT, () => {
-  console.log('listening on https://localhost:' + process.env.SECURE_PORT)
-})
+// secureServer.listen(process.env.SECURE_PORT, () => {
+//   console.log('listening on https://localhost:' + process.env.SECURE_PORT)
+// })
