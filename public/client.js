@@ -1,15 +1,11 @@
-const captions = window.document.getElementById("captions");
+const captions = window.document.getElementById("captions")
 let selectedDevice = 'default'
 const selectDeviceElement = window.document.getElementById("selectDevice")
 
-async function getDevices() {
+const getDevices = async () => {
 
   try {
     const audioDevices = await navigator.mediaDevices.enumerateDevices()
-
-    audioDevices.forEach(device => {
-      console.log(device)
-    })
 
     const filteredDevices = audioDevices.filter(device => device.kind === 'audioinput')
 
@@ -30,12 +26,12 @@ async function getDevices() {
 
 }
 
-function handleDeviceChange(event) {
+const handleDeviceChange = (event) => {
   selectedDevice = event.target.value
   console.log(selectedDevice)
 }
 
-async function getMicrophone() {
+const getMicrophone = async () => {
   const userMedia = await navigator.mediaDevices.getUserMedia({
     audio: {deviceId: selectedDevice},
   });
@@ -43,86 +39,86 @@ async function getMicrophone() {
   return new MediaRecorder(userMedia);
 }
 
-async function openMicrophone(microphone, socket) {
-  await microphone.start(500);
+const openMicrophone = async (microphone, socket) => {
+  await microphone.start(500)
 
   microphone.onstart = () => {
-    console.log("client: microphone opened");
-    document.body.classList.add("recording");
-  };
+    console.log("client: microphone opened")
+    document.body.classList.add("recording")
+  }
 
   microphone.onstop = () => {
-    console.log("client: microphone closed");
-    document.body.classList.remove("recording");
-  };
+    console.log("client: microphone closed")
+    document.body.classList.remove("recording")
+  }
 
   microphone.ondataavailable = (e) => {
-    const data = e.data;
-    console.log("client: sent data to websocket");
-    socket.send(data);
-  };
+    const data = e.data
+    console.log("client: sent data to websocket")
+    socket.send(data)
+  }
 }
 
-async function closeMicrophone(microphone) {
-  microphone.stop();
+const closeMicrophone = async (microphone) => {
+  microphone.stop()
 }
 
-async function start(socket) {
-  const listenButton = document.getElementById("record");
-  let microphone;
+const start = async (socket) => {
+  const listenButton = document.getElementById("record")
+  let microphone
 
-  console.log("client: waiting to open microphone");
+  console.log("client: waiting to open microphone")
 
   listenButton.addEventListener("click", async () => {
     if (!microphone) {
       // open and close the microphone
-      microphone = await getMicrophone();
-      await openMicrophone(microphone, socket);
+      microphone = await getMicrophone()
+      await openMicrophone(microphone, socket)
     } else {
-      await closeMicrophone(microphone);
-      microphone = undefined;
+      await closeMicrophone(microphone)
+      microphone = undefined
     }
-  });
+  })
 }
 
-async function getTempApiKey() {
-  const result = await fetch("/key");
-  const json = await result.json();
+const getTempApiKey = async () => {
+  const result = await fetch("/key")
+  const json = await result.json()
 
-  return json.key;
+  return json.key
 }
 
 window.addEventListener("load", async () => {
 
   await getDevices()
 
-  const key = await getTempApiKey();
+  const key = await getTempApiKey()
 
-  const { createClient } = deepgram;
-  const _deepgram = createClient(key);
+  const { createClient } = deepgram
+  const _deepgram = createClient(key)
 
-  const socket = _deepgram.listen.live({ model: "nova-2", smart_format: true });
+  const socket = _deepgram.listen.live({ model: "nova-2", smart_format: true })
 
   socket.on("open", async () => {
-    console.log("client: connected to websocket");
+    console.log("client: connected to websocket")
 
     socket.on("Results", (data) => {
-      console.log(data);
+      console.log(data)
 
-      const transcript = data.channel.alternatives[0].transcript;
+      const transcript = data.channel.alternatives[0].transcript
 
       if (transcript !== "")
         captions.innerHTML = transcript ? `<span>${transcript}</span>` : "";
-    });
+    })
 
-    socket.on("error", (e) => console.error(e));
+    socket.on("error", (e) => console.error(e))
 
-    socket.on("warning", (e) => console.warn(e));
+    socket.on("warning", (e) => console.warn(e))
 
-    socket.on("Metadata", (e) => console.log(e));
+    socket.on("Metadata", (e) => console.log(e))
 
-    socket.on("close", (e) => console.log(e));
+    socket.on("close", (e) => console.log(e))
 
-    await start(socket);
-  });
-});
+    await start(socket)
+  })
+})
