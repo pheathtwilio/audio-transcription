@@ -1,8 +1,43 @@
 const captions = window.document.getElementById("captions");
+let selectedDevice = 'default'
+const selectDeviceElement = window.document.getElementById("selectDevice")
+
+async function getDevices() {
+
+  try {
+    const audioDevices = await navigator.mediaDevices.enumerateDevices()
+
+    audioDevices.forEach(device => {
+      console.log(device)
+    })
+
+    const filteredDevices = audioDevices.filter(device => device.kind === 'audioinput')
+
+    if(filteredDevices.length > 0){
+      selectedDevice = filteredDevices[0].deviceId
+    }
+    
+    filteredDevices.forEach(device => {
+      let opt = document.createElement('option')
+      opt.value = device.deviceId
+      opt.innerHTML = device.label
+      selectDeviceElement.appendChild(opt)
+    })
+
+  }catch(error){
+    console.error(error)
+  }
+
+}
+
+function handleDeviceChange(event) {
+  selectedDevice = event.target.value
+  console.log(selectedDevice)
+}
 
 async function getMicrophone() {
   const userMedia = await navigator.mediaDevices.getUserMedia({
-    audio: true,
+    audio: {deviceId: selectedDevice},
   });
 
   return new MediaRecorder(userMedia);
@@ -58,12 +93,15 @@ async function getTempApiKey() {
 }
 
 window.addEventListener("load", async () => {
+
+  await getDevices()
+
   const key = await getTempApiKey();
 
   const { createClient } = deepgram;
   const _deepgram = createClient(key);
 
-  const socket = _deepgram.listen.live({ model: "nova", smart_format: true });
+  const socket = _deepgram.listen.live({ model: "nova-2", smart_format: true });
 
   socket.on("open", async () => {
     console.log("client: connected to websocket");

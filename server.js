@@ -1,5 +1,7 @@
 const express = require("express");
 const http = require("http");
+const https = require("https")
+const fs = require("fs")
 const { createClient } = require("@deepgram/sdk");
 const dotenv = require("dotenv");
 dotenv.config();
@@ -8,6 +10,14 @@ const client = createClient(process.env.DEEPGRAM_API_KEY);
 
 const app = express();
 const server = http.createServer(app);
+
+const options = {
+  key: fs.readFileSync("./ssl/rootCA.key"),
+  cert: fs.readFileSync("./ssl/rootCA.crt")
+  // ca: fs.readFileSync("")
+}
+
+const secureServer = https.createServer(options, app)
 
 app.use(express.static("public/"));
 app.get("/", (req, res) => {
@@ -45,6 +55,10 @@ app.get("/key", async (req, res) => {
   res.json(key);
 });
 
-server.listen(3000, () => {
-  console.log("listening on http://localhost:3000");
+server.listen(process.env.PORT, () => {
+  console.log('listening on http://localhost:' + process.env.PORT);
 });
+
+secureServer.listen(process.env.SECURE_PORT, () => {
+  console.log('listening on https://localhost:' + process.env.SECURE_PORT)
+})
