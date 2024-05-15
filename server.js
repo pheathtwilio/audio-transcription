@@ -47,15 +47,22 @@ const getTempApiKey = async (projectId) => {
   return result;
 };
 
-app.get("/key", async (req, res) => {
-  const projectId = await getProjectId();
-  const key = await getTempApiKey(projectId);
+const getApiKey = async () => {
+  return process.env.DEEPGRAM_API_KEY
+}
 
-  res.json(key);
+app.get("/key", async (req, res) => {
+  // const projectId = await getProjectId();
+  // const key = await getTempApiKey(projectId);
+
+  // console.log(key)
+
+  res.json(process.env.DEEPGRAM_API_KEY);
 });
 
 server.listen(process.env.PORT, () => {
   console.log('listening on http://localhost:' + process.env.PORT);
+ 
 });
 
 // secureServer.listen(process.env.SECURE_PORT, () => {

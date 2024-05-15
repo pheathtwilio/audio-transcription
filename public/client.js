@@ -83,9 +83,9 @@ const start = async (socket) => {
 
 const getTempApiKey = async () => {
   const result = await fetch("/key")
-  const json = await result.json()
+  const key = await result.json()
 
-  return json.key
+  return key
 }
 
 window.addEventListener("load", async () => {
@@ -108,7 +108,7 @@ window.addEventListener("load", async () => {
       const transcript = data.channel.alternatives[0].transcript
 
       if (transcript !== "")
-        captions.innerHTML = transcript ? `<span>${transcript}</span>` : "";
+        captions.innerHTML += transcript ? `<span>${transcript}</span>` : "";
     })
 
     socket.on("error", (e) => console.error(e))
