@@ -81,7 +81,7 @@ const start = async (socket) => {
   })
 }
 
-const getTempApiKey = async () => {
+const getApiKey = async () => {
   const result = await fetch("/key")
   const key = await result.json()
 
@@ -92,7 +92,7 @@ window.addEventListener("load", async () => {
 
   await getDevices()
 
-  const key = await getTempApiKey()
+  const key = await getApiKey()
 
   const { createClient } = deepgram
   const _deepgram = createClient(key)
@@ -107,7 +107,7 @@ window.addEventListener("load", async () => {
       const transcript = data.channel.alternatives[0].transcript
 
       if (transcript !== "")
-        transcriptElement.value += transcript
+        transcriptElement.value += transcript + ' '
     })
 
     socket.on("error", (e) => console.error(e))
