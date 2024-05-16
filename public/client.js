@@ -1,4 +1,4 @@
-const captions = window.document.getElementById("captions")
+const transcriptElement = window.document.getElementById("transcriptText")
 let selectedDevice = 'default'
 const selectDeviceElement = window.document.getElementById("selectDevice")
 
@@ -103,12 +103,11 @@ window.addEventListener("load", async () => {
     console.log("client: connected to websocket")
 
     socket.on("Results", (data) => {
-      console.log(data)
 
       const transcript = data.channel.alternatives[0].transcript
 
       if (transcript !== "")
-        captions.innerHTML += transcript ? `<span>${transcript}</span>` : "";
+        transcriptElement.value += transcript
     })
 
     socket.on("error", (e) => console.error(e))
