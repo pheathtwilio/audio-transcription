@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Deepgram Test</title>
+    <title>Audio Transcription</title>
     <script src="https://cdn.jsdelivr.net/npm/@deepgram/sdk@v3.0.0"></script>
     <link
       rel="stylesheet"
@@ -44,6 +44,10 @@
     </div>
     <div class="transcript">
       <textarea id="transcriptText"></textarea>
+    </div>
+    <div class="summarize">
+      <textarea id="summarizeText"></textarea>
+      <button onclick="handleSummarize()">Summarize</button>
     </div>
     <script src="client.js"></script>
   </body>

@@ -1,15 +1,19 @@
-const express = require("express");
-const http = require("http");
+// import OpenAI from "openai"
+
+const express = require("express")
+const http = require("http")
 const https = require("https")
 const fs = require("fs")
-const { createClient } = require("@deepgram/sdk");
-const dotenv = require("dotenv");
-dotenv.config();
+const { createClient } = require("@deepgram/sdk")
+const OpenAI = require('openai')
+const dotenv = require("dotenv")
+const bodyParser = require("body-parser")
+dotenv.config()
 
-const client = createClient(process.env.DEEPGRAM_API_KEY);
+const client = createClient(process.env.DEEPGRAM_API_KEY)
 
-const app = express();
-const server = http.createServer(app);
+const app = express()
+const server = http.createServer(app)
 
 const options = {
   key: fs.readFileSync("./ssl/rootCA.key"),
@@ -18,53 +22,77 @@ const options = {
 
 const secureServer = https.createServer(options, app)
 
-app.use(express.static("public/"));
+app.use(express.static("public/"))
+app.use(bodyParser.json())
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-});
+  res.sendFile(__dirname + "/public/index.html")
+})
 
-const getProjectId = async () => {
-  const { result, error } = await client.manage.getProjects();
+// const getProjectId = async () => {
+//   const { result, error } = await client.manage.getProjects()
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error
+//   }
 
-  return result.projects[0].project_id;
-};
+//   return result.projects[0].project_id
+// }
 
-const getTempApiKey = async (projectId) => {
-  const { result, error } = await client.manage.createProjectKey(projectId, {
-    comment: "short lived",
-    scopes: ["usage:write"],
-    time_to_live_in_seconds: 20,
-  });
+// const getTempApiKey = async (projectId) => {
+//   const { result, error } = await client.manage.createProjectKey(projectId, {
+//     comment: "short lived",
+//     scopes: ["usage:write"],
+//     time_to_live_in_seconds: 20,
+//   });
 
-  if (error) {
-    throw error;
-  }
+//   if (error) {
+//     throw error
+//   }
 
-  return result;
-};
+//   return result
+// };
 
 const getApiKey = async () => {
   return process.env.DEEPGRAM_API_KEY
 }
 
 app.get("/key", async (req, res) => {
-  // const projectId = await getProjectId();
-  // const key = await getTempApiKey(projectId);
+  res.json(process.env.DEEPGRAM_API_KEY)
+})
 
-  // console.log(key)
+const summarize = async (content) => {
 
-  res.json(process.env.DEEPGRAM_API_KEY);
-});
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+  })
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: "Your role is to summarize this transcription of a meeting into concise points labeled NOW, NEXT STEPS and RISK. Identify any risk within the transcript and add it to the appropriate point and respond in json format.",
+      },
+      { role: "user", content: content },
+    ],
+    model: "gpt-4o",
+    response_format: { type: "json_object" },
+  })
+
+  return completion.choices[0].message.content
+}
+
+app.post("/summarize", async (req, res) => {  
+  const content = await summarize(req.body.content)
+
+  const response = {
+    content: "NOW: " + JSON.parse(content).NOW + " NEXT STEPS: " + JSON.parse(content).NEXT_STEPS + " RISK: " + JSON.parse(content).RISK
+  }
+
+  console.log(response)
+
+  res.json(response)
+})
 
 server.listen(process.env.PORT, () => {
-  console.log('listening on http://localhost:' + process.env.PORT);
- 
-});
-
-// secureServer.listen(process.env.SECURE_PORT, () => {
-//   console.log('listening on https://localhost:' + process.env.SECURE_PORT)
-// })
+  console.log('listening on http://localhost:' + process.env.PORT)
+})

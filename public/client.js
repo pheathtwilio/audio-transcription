@@ -1,6 +1,7 @@
 const transcriptElement = window.document.getElementById("transcriptText")
 let selectedDevice = 'default'
 const selectDeviceElement = window.document.getElementById("selectDevice")
+const summarizeElement = window.document.getElementById("summarizeText")
 
 const getDevices = async () => {
 
@@ -29,6 +30,24 @@ const getDevices = async () => {
 const handleDeviceChange = (event) => {
   selectedDevice = event.target.value
   console.log(selectedDevice)
+}
+
+const handleSummarize = async (event) => {
+
+  const response = await fetch('/summarize', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({content: transcriptElement.value})
+  })
+
+  const content = await response.json()
+  
+  summarizeElement.value = content.content + "\n\n"
+  // console.log("RESPONSE " + content.content)
+
+  
 }
 
 const getMicrophone = async () => {
