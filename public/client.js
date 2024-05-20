@@ -2,6 +2,7 @@ const transcriptElement = window.document.getElementById("transcriptText")
 let selectedDevice = 'default'
 const selectDeviceElement = window.document.getElementById("selectDevice")
 const summarizeElement = window.document.getElementById("summarizeText")
+const summarizeButton = window.document.getElementById("summarizeButton")
 
 const getDevices = async () => {
 
@@ -34,6 +35,18 @@ const handleDeviceChange = (event) => {
 
 const handleSummarize = async (event) => {
 
+  // Change button state
+  summarizeButton.removeChild(summarizeButton.firstElementChild)
+  let statusSpan = document.createElement('span')
+  statusSpan.className = "spinner-border spinner-border-sm"
+  statusSpan.role = "status"
+  statusSpan.ariaHidden = true
+  summarizeButton.appendChild(statusSpan)
+  let span = document.createElement('span')
+  span.className = "sr-only"
+  span.innerHTML = " Loading..."
+  summarizeButton.appendChild(span)
+
   const response = await fetch('/summarize', {
     method: 'POST',
     headers: {
@@ -44,8 +57,15 @@ const handleSummarize = async (event) => {
 
   const content = await response.json()
   
-  summarizeElement.value = content.content + "\n\n"
-  // console.log("RESPONSE " + content.content)
+  summarizeElement.value = content.content
+ 
+  // Change button state
+  summarizeButton.removeChild(summarizeButton.firstElementChild)
+  summarizeButton.removeChild(summarizeButton.firstElementChild)
+  span = document.createElement('span')
+  span.className = "sr-only"
+  span.innerHTML = "Summarize"
+  summarizeButton.appendChild(span)
 
   
 }
@@ -116,7 +136,7 @@ window.addEventListener("load", async () => {
   const { createClient } = deepgram
   const _deepgram = createClient(key)
 
-  const socket = _deepgram.listen.live({ model: "nova-2", smart_format: true })
+  const socket = _deepgram.listen.live({ diarize: true, model: "nova-2", smart_format: true })
 
   socket.on("open", async () => {
     console.log("client: connected to websocket")

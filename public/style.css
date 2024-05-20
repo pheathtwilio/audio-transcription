@@ -93,29 +93,10 @@ body {
   margin: 21px;
 }
 
-.captions {
-  font: 3.2rem/1.25 Verdana, Geneva, Tahoma, sans-serif;
-  /* font-family: ; */
-  text-transform: uppercase;
-  text-align: center;
-  font-weight: 400;
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
 
-.captions span {
-  display: inline-block;
-  line-height: 4rem;
-  padding: 1rem;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.3);
-}
-
-textarea {
+/* textarea {
   background-color: rgba(0, 0, 0, 0.3);
   color:white;
   height: 500px;
   width: 500px;
-}
+} */
