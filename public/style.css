@@ -93,10 +93,6 @@ body {
   margin: 21px;
 }
 
-
-/* textarea {
-  background-color: rgba(0, 0, 0, 0.3);
-  color:white;
+textarea {
   height: 500px;
-  width: 500px;
-} */
+}
