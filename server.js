@@ -1,5 +1,3 @@
-// import OpenAI from "openai"
-
 const express = require("express")
 const http = require("http")
 const https = require("https")
@@ -27,30 +25,6 @@ app.use(bodyParser.json())
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/public/index.html")
 })
-
-// const getProjectId = async () => {
-//   const { result, error } = await client.manage.getProjects()
-
-//   if (error) {
-//     throw error
-//   }
-
-//   return result.projects[0].project_id
-// }
-
-// const getTempApiKey = async (projectId) => {
-//   const { result, error } = await client.manage.createProjectKey(projectId, {
-//     comment: "short lived",
-//     scopes: ["usage:write"],
-//     time_to_live_in_seconds: 20,
-//   });
-
-//   if (error) {
-//     throw error
-//   }
-
-//   return result
-// };
 
 const getApiKey = async () => {
   return process.env.DEEPGRAM_API_KEY

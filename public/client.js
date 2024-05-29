@@ -143,7 +143,17 @@ window.addEventListener("load", async () => {
 
     socket.on("Results", (data) => {
 
-      const transcript = data.channel.alternatives[0].transcript
+      let speaker = ""
+      let transcript = ""
+
+      data.channel.alternatives[0].words.forEach(element => {
+        if(element.speaker != speaker){
+          transcript += "\nspeaker: " + element.speaker + " " + element.word + " "
+          speaker = element.speaker
+        }else{
+          transcript += element.word + " "
+        }
+      })
 
       if (transcript !== "")
         transcriptElement.value += transcript + ' '
