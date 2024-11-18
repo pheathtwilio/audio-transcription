@@ -25,7 +25,15 @@
         <textarea readonly class="form-control" placeholder="Summary" id="summarizeText"></textarea>
         <button id="summarizeButton" type="button" class="btn btn-dark" onclick="handleSummarize()">
           <!-- <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> -->
-          <span class="sr-only">Summarize</span>
+          <span class="sr-only">Summarize Notes</span>
+        </button>
+        <button id="summarizeGeneralButton" type="button" class="btn btn-dark" onclick="handleSummarizeGeneral()">
+          <!-- <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> -->
+          <span class="sr-only">Summarize General</span>
+        </button>
+        <button id="sendToAirtable" type="button" class="btn btn-dark" onclick="sendToAirtable()">
+          <!-- <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> -->
+          <span class="sr-only">Send to Airtable</span>
         </button>
       </div>
 

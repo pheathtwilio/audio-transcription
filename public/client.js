@@ -3,11 +3,15 @@ let selectedDevice = 'default'
 const selectDeviceElement = window.document.getElementById("selectDevice")
 const summarizeElement = window.document.getElementById("summarizeText")
 const summarizeButton = window.document.getElementById("summarizeButton")
+const summarizeGeneralButton = window.document.getElementById("summarizeGeneralButton")
+const sendToAirtableButton = window.document.getElementById("sendToAirtable")
 
 const getDevices = async () => {
 
   try {
     const audioDevices = await navigator.mediaDevices.enumerateDevices()
+
+    console.log(audioDevices)
 
     const filteredDevices = audioDevices.filter(device => device.kind === 'audioinput')
 
@@ -66,6 +70,86 @@ const handleSummarize = async (event) => {
   span.className = "sr-only"
   span.innerHTML = "Summarize"
   summarizeButton.appendChild(span)
+
+  
+}
+
+const handleSummarizeGeneral = async (event) => {
+
+  // Change button state
+  summarizeGeneralButton.removeChild(summarizeGeneralButton.firstElementChild)
+  let statusSpan = document.createElement('span')
+  statusSpan.className = "spinner-border spinner-border-sm"
+  statusSpan.role = "status"
+  statusSpan.ariaHidden = true
+  summarizeGeneralButton.appendChild(statusSpan)
+  let span = document.createElement('span')
+  span.className = "sr-only"
+  span.innerHTML = " Loading..."
+  summarizeGeneralButton.appendChild(span)
+
+  const response = await fetch('/summarizeGeneral', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({content: transcriptElement.value})
+  })
+
+  const content = await response.json()
+  
+  summarizeElement.value = content.content
+ 
+  // Change button state
+  summarizeGeneralButton.removeChild(summarizeGeneralButton.firstElementChild)
+  summarizeGeneralButton.removeChild(summarizeGeneralButton.firstElementChild)
+  span = document.createElement('span')
+  span.className = "sr-only"
+  span.innerHTML = "Summarize"
+  summarizeGeneralButton.appendChild(span)
+
+  
+}
+
+const sendToAirtable = async (event) => {
+
+  // Change button state
+  sendToAirtableButton.removeChild(sendToAirtableButton.firstElementChild)
+  let statusSpan = document.createElement('span')
+  statusSpan.className = "spinner-border spinner-border-sm"
+  statusSpan.role = "status"
+  statusSpan.ariaHidden = true
+  sendToAirtableButton.appendChild(statusSpan)
+  let span = document.createElement('span')
+  span.className = "sr-only"
+  span.innerHTML = " Loading..."
+  sendToAirtableButton.appendChild(span)
+
+  const response = await fetch('/sendToAirtable', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(
+      {
+        transcription: transcriptElement.value,
+        summary: summarizeElement.value
+      }
+    )
+  })
+
+  const message = await response.json()
+  console.log(message)
+  
+  // summarizeElement.value = content.content
+ 
+  // Change button state
+  sendToAirtableButton.removeChild(sendToAirtableButton.firstElementChild)
+  sendToAirtableButton.removeChild(sendToAirtableButton.firstElementChild)
+  span = document.createElement('span')
+  span.className = "sr-only"
+  span.innerHTML = "Send to Airtable"
+  sendToAirtableButton.appendChild(span)
 
   
 }
@@ -157,6 +241,7 @@ window.addEventListener("load", async () => {
 
       if (transcript !== "")
         transcriptElement.value += transcript + ' '
+        // transcriptElement.scrollTop(transcriptElement.scrollHeight)
     })
 
     socket.on("error", (e) => console.error(e))

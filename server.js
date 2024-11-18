@@ -8,6 +8,8 @@ const dotenv = require("dotenv")
 const bodyParser = require("body-parser")
 dotenv.config()
 
+const Airtable = require('airtable')
+
 const client = createClient(process.env.DEEPGRAM_API_KEY)
 
 const app = express()
@@ -66,6 +68,111 @@ app.post("/summarize", async (req, res) => {
 
   res.json(response)
 })
+
+const summarizeGeneral = async (content) => {
+
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+  })
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      {
+        role: "system",
+        content: [{ "type": "text", "text" : "Your role is to summarize this transcription of a meeting and to generalize what happened at the beginning, middle and end. Ensure to respond with key points that happened during the discussion. And any action items are noted at the end. Respond in json format."}]
+      },
+      { 
+        role: "user",
+        content: [{ "type": "text", "text":content}]
+      },
+    ],
+    model: "gpt-4o",
+    response_format: { type: "json_object" },
+  })
+
+  return completion.choices[0].message.content
+}
+
+app.post("/summarizeGeneral", async (req, res) => {  
+  const content = await summarizeGeneral(req.body.content)
+  const parsedContent = JSON.parse(content)
+  let responseContent = ""
+
+  for (const key in JSON.parse(content)){
+  
+    responseContent += key.toString().toUpperCase() + "\n"
+
+    // if obj has inner obj
+    if(typeof parsedContent[key] === 'object'){
+      let innerObject = parsedContent[key]
+      for(const childKey in innerObject){
+        // if innerObj jas another innerObj
+        if(typeof innerObject[childKey] === 'object'){
+          let grandChildObject = innerObject[childKey]
+          for(const grandChildKey in grandChildObject){
+            responseContent += grandChildKey.toString().toUpperCase() + ": " + grandChildObject[grandChildKey] + " "
+          }
+        }else{
+          responseContent += childKey.toString().toUpperCase() + ": " + innerObject[childKey] + " "
+        }
+      }
+      responseContent += "\n\n"
+    }
+  }
+
+  res.json({ content: responseContent })
+})
+
+const cleanup = async () => {
+
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+  })
+
+  const completion = await openai.chat.completions.create({
+    messages: [
+      { 
+        role: "user",
+        content: [{ "type": "text", "text":"Forget everything we talked about and prepare for new content"}]
+      },
+    ],
+    model: "gpt-4o",
+  })
+
+}
+
+const sendToAirtable = async (transcription, summary) => {
+
+  const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID)
+
+  try{
+
+    const record = await base(process.env.AIRTABLE_TABLE_NAME).create({
+      "Transcription":transcription,
+      "Summary":summary
+    })
+
+    return record
+
+  }catch(err){
+
+    console.error(err)
+
+  }
+
+}
+
+app.post("/sendToAirtable", async (req, res) => {  
+  
+  const record = await sendToAirtable(req.body.transcription, req.body.summary)
+
+  cleanup()
+
+  res.json({ record: record})
+  
+})
+
+
 
 server.listen(process.env.PORT, () => {
   console.log('listening on http://localhost:' + process.env.PORT)
