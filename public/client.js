@@ -5,13 +5,12 @@ const summarizeElement = window.document.getElementById("summarizeText")
 const summarizeButton = window.document.getElementById("summarizeButton")
 const summarizeGeneralButton = window.document.getElementById("summarizeGeneralButton")
 const sendToAirtableButton = window.document.getElementById("sendToAirtable")
+const copyToClipboardButton = window.document.getElementById("copyToClipboard")
 
 const getDevices = async () => {
 
   try {
     const audioDevices = await navigator.mediaDevices.enumerateDevices()
-
-    console.log(audioDevices)
 
     const filteredDevices = audioDevices.filter(device => device.kind === 'audioinput')
 
@@ -152,6 +151,20 @@ const sendToAirtable = async (event) => {
   sendToAirtableButton.appendChild(span)
 
   
+}
+
+const copyToClipboard = async () => {
+
+  copyToClipboardButton.addEventListener('click', async () => {
+    const text = transcriptElement.value
+    try{
+      await navigator.clipboard.writeText(text)
+      alert('Text Copied to Clipboard')
+    }catch(e){
+      console.error(`Failed to copy: ${e}`)
+    }
+  })
+
 }
 
 const getMicrophone = async () => {
