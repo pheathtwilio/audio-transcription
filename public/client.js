@@ -156,7 +156,7 @@ const sendToAirtable = async (event) => {
 const copyToClipboard = async () => {
 
   copyToClipboardButton.addEventListener('click', async () => {
-    const text = transcriptElement.value
+    const text = summarizeElement.value
     try{
       await navigator.clipboard.writeText(text)
       alert('Text Copied to Clipboard')
